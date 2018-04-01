@@ -11,6 +11,36 @@ class MoviesController < ApplicationController
   end
 
   def index
+    if session[:sort_title] == true
+      sort_title
+      redirect_to "/movies/sort_title"
+    elsif session[:sort_release_date] == true
+      sort_release_date
+      redirect_to "/movies/sort_release_date"
+    else
+      @all_ratings = Movie.ratings
+      @selected = ["G", "R", "PG", "PG-13"]
+      if params[:ratings] != nil
+        @selected = []
+        ratings = params[:ratings]
+        ratings.each do |k, v|
+          if @movies == nil
+            @movies = Movie.where(rating: k)
+          else
+            @movies = @movies + Movie.where(rating: k)
+          end
+          @selected << k
+        end
+      else
+        @movies = Movie.all
+      end
+    end
+  end
+
+  def sort_title
+    session[:sort_title] = true
+    session[:sort_release_date] = false
+
     @all_ratings = Movie.ratings
     @selected = ["G", "R", "PG", "PG-13"]
     if params[:ratings] != nil
@@ -27,14 +57,30 @@ class MoviesController < ApplicationController
     else
       @movies = Movie.all
     end
-  end
-
-  def sort_title
-    @movies = Movie.order('title')
+    @movies = @movies.order('title')
   end
 
   def sort_release_date
-    @movies = Movie.order('release_date')
+    session[:sort_release_date] = true
+    session[:sort_title] = false
+
+    @all_ratings = Movie.ratings
+    @selected = ["G", "R", "PG", "PG-13"]
+    if params[:ratings] != nil
+      @selected = []
+      ratings = params[:ratings]
+      ratings.each do |k, v|
+        if   @movies == nil
+          @movies = Movie.where(rating: k)
+        else
+          @movies = @movies + Movie.where(rating: k)
+        end
+        @selected << k
+      end
+    else
+      @movies = Movie.all
+    end
+    @movies = @movies.order('release_date')
   end
 
   def new
