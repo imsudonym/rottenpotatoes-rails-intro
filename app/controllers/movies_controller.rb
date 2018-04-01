@@ -12,19 +12,17 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.ratings
-    @selected = ["G""", "R", "PG-13", "PG"]
+    @selected = ["G", "R", "PG", "PG-13"]
     if params[:ratings] != nil
-
       @selected = []
       ratings = params[:ratings]
-      ratings.each do |key, value|
-          if(@movies == nil)
-            @movies = Movie.where(rating: key)
-          else
-            @movies = @movies + Movie.where(rating: key)
-          end
-
-          @selected << key
+      ratings.each do |k, v|
+        if @movies == nil
+          @movies = Movie.where(rating: k)
+        else
+          @movies = @movies + Movie.where(rating: k)
+        end
+        @selected << k
       end
     else
       @movies = Movie.all
