@@ -15,13 +15,13 @@ class MoviesController < ApplicationController
   end
 
   def sort_title
-    puts "inside sort"
     @movies = Movie.order('title')
   end
 
   def sort_release_date
     @movies = Movie.order('release_date')
   end
+
   def new
     # default: render 'new' template
   end
