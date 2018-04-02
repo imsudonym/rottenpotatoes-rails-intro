@@ -11,41 +11,35 @@ class MoviesController < ApplicationController
   end
 
   def index
-    if session[:sort_title] == true
-      sort_title
-      redirect_to "/movies/sort_title"
-    elsif session[:sort_release_date] == true
-      sort_release_date
-      redirect_to "/movies/sort_release_date"
+    #session.clear
+      @selected = session[:selected] || ["G", "PG", "PG-13", "R"]
+    get_movies_by_rating
+
+    if params[:sort_by] == 'title'
+      @sort_title = session[:sort_title] || true
+      @sort_release_date = false
+      @movies = @movies.sort_by &:title
+    elsif params[:sort_by] == 'date'
+      @sort_title = false
+      @sort_release_date = session[:sort_release_date] || true
+      @movies = @movies.sort_by &:release_date
     else
-      @all_ratings = Movie.ratings
-      @selected = ["G", "R", "PG", "PG-13"]
-      if params[:ratings] != nil
-        @selected = []
-        ratings = params[:ratings]
-        ratings.each do |k, v|
-          if @movies == nil
-            @movies = Movie.where(rating: k)
-          else
-            @movies = @movies + Movie.where(rating: k)
-          end
-          @selected << k
-        end
-      else
-        @movies = Movie.all
-      end
+      @sort_title = session[:sort_title] || false
+      @sort_release_date = session[:sort_release_date] || false
     end
+
+    session[:sort_title] = @sort_title
+    session[:sort_release_date] = @sort_release_date
   end
 
-  def sort_title
-    session[:sort_title] = true
-    session[:sort_release_date] = false
-
+  def get_movies_by_rating
     @all_ratings = Movie.ratings
-    @selected = ["G", "R", "PG", "PG-13"]
-    if params[:ratings] != nil
+    puts "Selected:   #{@selected}"
+    puts "Ratings:   #{params[:ratings]}"
+    ratings = params[:ratings] || session[:selected]
+    if ratings != nil
       @selected = []
-      ratings = params[:ratings]
+
       ratings.each do |k, v|
         if @movies == nil
           @movies = Movie.where(rating: k)
@@ -55,32 +49,11 @@ class MoviesController < ApplicationController
         @selected << k
       end
     else
+      puts "ratings nil"
+      @ratings = session[:selected]
       @movies = Movie.all
     end
-    @movies = @movies.order('title')
-  end
-
-  def sort_release_date
-    session[:sort_release_date] = true
-    session[:sort_title] = false
-
-    @all_ratings = Movie.ratings
-    @selected = ["G", "R", "PG", "PG-13"]
-    if params[:ratings] != nil
-      @selected = []
-      ratings = params[:ratings]
-      ratings.each do |k, v|
-        if   @movies == nil
-          @movies = Movie.where(rating: k)
-        else
-          @movies = @movies + Movie.where(rating: k)
-        end
-        @selected << k
-      end
-    else
-      @movies = Movie.all
-    end
-    @movies = @movies.order('release_date')
+    session[:selected] = @selected
   end
 
   def new
