@@ -4,9 +4,8 @@ Rails.application.routes.draw do
 
   # You can have the root of your site routed with "root"
   root 'movies#index'
-  get 'movies/:sort_by/index'  => 'movies#index', as: :movies_sort
-  #get 'movies/:id'  => 'movies#show'
   # Example of regular route:
+  get 'movies/:sort_by/index'  => 'movies#index', as: :movies_sort
   #   get 'products/:id' => 'catalog#view'
 
   # Example of named route that can be invoked with purchase_url(id: product.id)

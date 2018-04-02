@@ -11,15 +11,16 @@ class MoviesController < ApplicationController
   end
 
   def index
-    #session.clear
-      @selected = session[:selected] || ["G", "PG", "PG-13", "R"]
+    @selected = session[:selected]
     get_movies_by_rating
 
-    if params[:sort_by] == 'title'
+    @sort_by = params[:sort_by] || session[:sort_by]
+
+    if @sort_by == 'title'
       @sort_title = session[:sort_title] || true
       @sort_release_date = false
       @movies = @movies.sort_by &:title
-    elsif params[:sort_by] == 'date'
+    elsif @sort_by == 'date'
       @sort_title = false
       @sort_release_date = session[:sort_release_date] || true
       @movies = @movies.sort_by &:release_date
@@ -28,18 +29,16 @@ class MoviesController < ApplicationController
       @sort_release_date = session[:sort_release_date] || false
     end
 
+    session[:sort_by] = @sort_by
     session[:sort_title] = @sort_title
     session[:sort_release_date] = @sort_release_date
   end
 
   def get_movies_by_rating
     @all_ratings = Movie.ratings
-    puts "Selected:   #{@selected}"
-    puts "Ratings:   #{params[:ratings]}"
     ratings = params[:ratings] || session[:selected]
     if ratings != nil
       @selected = []
-
       ratings.each do |k, v|
         if @movies == nil
           @movies = Movie.where(rating: k)
@@ -49,10 +48,9 @@ class MoviesController < ApplicationController
         @selected << k
       end
     else
-      puts "ratings nil"
-      @ratings = session[:selected]
       @movies = Movie.all
     end
+
     session[:selected] = @selected
   end
 
